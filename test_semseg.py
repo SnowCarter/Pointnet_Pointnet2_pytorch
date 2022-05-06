@@ -84,7 +84,7 @@ def main(args):
     TEST_DATASET_WHOLE_SCENE = ScannetDatasetWholeScene(root, split='test', test_area=args.test_area, block_points=NUM_POINT)
     log_string('load test data time is %s' % (time.time()-end))
     log_string("The number of test data is: %d" % len(TEST_DATASET_WHOLE_SCENE))
-    
+
     end=time.time()
     '''MODEL LOADING'''
     model_name = os.listdir(experiment_dir + '/logs')[0].split('.')[0]
@@ -169,20 +169,21 @@ def main(args):
                 for i in pred_label:
                     pl_save.write(str(int(i)) + '\n')
                 pl_save.close()
-            for i in range(whole_scene_label.shape[0]):
-                color = g_label2color[pred_label[i]]
-                color_gt = g_label2color[whole_scene_label[i]]
-                if args.visual:
-                    fout.write('v %f %f %f %d %d %d\n' % (
-                        whole_scene_data[i, 0], whole_scene_data[i, 1], whole_scene_data[i, 2], color[0], color[1],
-                        color[2]))
-                    fout_gt.write(
-                        'v %f %f %f %d %d %d\n' % (
-                            whole_scene_data[i, 0], whole_scene_data[i, 1], whole_scene_data[i, 2], color_gt[0],
-                            color_gt[1], color_gt[2]))
-            if args.visual:
-                fout.close()
-                fout_gt.close()
+                # label is not the same with our dataset, so can't run this scope code.
+            # for i in range(whole_scene_label.shape[0]):
+            #     color = g_label2color[pred_label[i]]
+            #     color_gt = g_label2color[whole_scene_label[i]]
+            #     if args.visual:
+            #         fout.write('v %f %f %f %d %d %d\n' % (
+            #             whole_scene_data[i, 0], whole_scene_data[i, 1], whole_scene_data[i, 2], color[0], color[1],
+            #             color[2]))
+            #         fout_gt.write(
+            #             'v %f %f %f %d %d %d\n' % (
+            #                 whole_scene_data[i, 0], whole_scene_data[i, 1], whole_scene_data[i, 2], color_gt[0],
+            #                 color_gt[1], color_gt[2]))
+            # if args.visual:
+            #     fout.close()
+            #     fout_gt.close()
 
         IoU = np.array(total_correct_class) / (np.array(total_iou_deno_class, dtype=np.float) + 1e-6)
         iou_per_class_str = '------- IoU --------\n'
