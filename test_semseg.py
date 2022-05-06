@@ -14,13 +14,12 @@ import importlib
 from tqdm import tqdm
 import provider
 import numpy as np
-
+import time
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = BASE_DIR
 sys.path.append(os.path.join(ROOT_DIR, 'models'))
-
-classes = ['ceiling', 'floor', 'wall', 'beam', 'column', 'window', 'door', 'table', 'chair', 'sofa', 'bookcase',
-           'board', 'clutter']
+# CLASS_NAME
+classes = ['Normal concrete sleeper','Normal wooden sleeper','Normal steel sleeper','Turnout concrete sleeper','Turnout wooden sleeper', 'Turnout steel sleeper', 'Turnout electric sleeper', 'Rail', 'Balise', 'Normal concrete sleeper fastening system', 'Normal wooden sleeper fastening system', 'Normal steel sleeper fastening system', 'Cable Channel', 'Weichenherz', 'Track ballast', 'Zwergsignal', 'Mast', 'Catenary and other general electrical cables', 'Signal bridge']
 class2label = {cls: i for i, cls in enumerate(classes)}
 seg_classes = class2label
 seg_label_to_cat = {}
@@ -75,15 +74,18 @@ def main(args):
     log_string('PARAMETER ...')
     log_string(args)
 
-    NUM_CLASSES = 13
+    NUM_CLASSES = 19 # NUM_CLASS
     BATCH_SIZE = args.batch_size
     NUM_POINT = args.num_point
 
-    root = 'data/s3dis/stanford_indoor3d/'
+    root = './dataset/'
 
+    end=time.time()
     TEST_DATASET_WHOLE_SCENE = ScannetDatasetWholeScene(root, split='test', test_area=args.test_area, block_points=NUM_POINT)
+    log_string('load test data time is %s' % (time.time()-end))
     log_string("The number of test data is: %d" % len(TEST_DATASET_WHOLE_SCENE))
-
+    
+    end=time.time()
     '''MODEL LOADING'''
     model_name = os.listdir(experiment_dir + '/logs')[0].split('.')[0]
     MODEL = importlib.import_module(model_name)
@@ -102,7 +104,7 @@ def main(args):
         total_iou_deno_class = [0 for _ in range(NUM_CLASSES)]
 
         log_string('---- EVALUATION WHOLE SCENE----')
-
+        end=time.time()
         for batch_idx in range(num_batches):
             print("Inference [%d/%d] %s ..." % (batch_idx + 1, num_batches, scene_id[batch_idx]))
             total_seen_class_tmp = [0 for _ in range(NUM_CLASSES)]
@@ -194,7 +196,7 @@ def main(args):
             np.mean(np.array(total_correct_class) / (np.array(total_seen_class, dtype=np.float) + 1e-6))))
         log_string('eval whole scene point accuracy: %f' % (
                 np.sum(total_correct_class) / float(np.sum(total_seen_class) + 1e-6)))
-
+        log_string('test time is %s' % (time.time()-end))
         print("Done!")
 
 
